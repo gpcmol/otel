@@ -1,0 +1,89 @@
+alloy:
+  configMap:
+    create: true
+    content: |-
+      logging {
+        level  = "info"
+        format = "logfmt"
+      }
+
+      otelcol.receiver.otlp "default" {
+        grpc {
+          endpoint = "0.0.0.0:4317"
+        }
+        http {
+          endpoint = "0.0.0.0:4318"
+        }
+        output {
+          metrics = [otelcol.processor.batch.default.input]
+          logs    = [otelcol.processor.batch.default.input]
+          traces  = [otelcol.processor.batch.default.input]
+        }
+      }
+
+      otelcol.processor.memory_limiter "default" {
+          check_interval   = "1s"
+          limit_percentage = 75
+          spike_limit_percentage = 15
+
+          output {
+            metrics = [otelcol.exporter.otlp.default.input]
+            logs    = [otelcol.exporter.otlp.default.input]
+            traces  = [otelcol.exporter.otlp.default.input]
+        }
+      }
+
+      otelcol.processor.batch "default" {
+        send_batch_size: 10000
+        timeout: 10s
+      
+        output {
+          metrics = [otelcol.exporter.otlphttp.default.input]
+          logs    = [otelcol.exporter.otlphttp.default.input]
+          traces  = [otelcol.exporter.otlphttp.default.input]
+        }
+      }
+
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+      
+      discovery.kubernetes "nodes" {
+        role = "node"
+      }
+      
+      discovery.kubernetes "services" {
+        role = "service"
+      }
+      
+      discovery.kubernetes "endpoints" {
+        role = "endpoints"
+      }
+      
+      discovery.kubernetes "endpointslices" {
+        role = "endpointslice"
+      }
+      
+      discovery.kubernetes "ingresses" {
+        role = "ingress"
+      }
+    name: null
+    key: null
+  extraPorts:
+    - name: "otelgrpc"
+      port: 4317
+      targetPort: 4317
+      protocol: "TCP"
+    - name: "otelhttp"
+      port: 4318
+      targetPort: 4318
+      protocol: "TCP"
+
+controller:
+  autoscaling:
+    enabled: true
+
+ingress:
+  enabled: true
+  hosts:
+    - alloy.local

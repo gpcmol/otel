@@ -1,0 +1,49 @@
+ingester:
+  autoscaling:
+    enabled: true
+    minReplicas: 3 # keep this value
+    maxReplicas: 6
+server:
+  grpc_server_max_recv_msg_size: 16777216 # 16 mb
+  grpc_server_max_send_msg_size: 16777216
+reportingEnabled: false
+gateway:
+  enabled: true
+minio:
+  enabled: true
+traces:
+  otlp:
+    http:
+      enabled: true
+    grpc:
+      enabled: true
+distributor:
+  config:
+    log_received_spans:
+      enabled: true # only for debugging
+global_overrides:
+  metrics_generator_processors:
+    - service-graphs
+    - span-metrics
+    - local-blocks
+metricsGenerator:
+  enabled: true
+  config:
+    processor:
+      local_blocks:
+        flush_to_storage: true
+      span_metrics:
+        dimensions:
+          - http.request.method
+          - http.response.status_code
+        dimension_mappings:
+          - name: http_request_method
+            source_labels:
+              - http.request.method
+          - name: http_response_status_code
+            source_labels:
+              - http.response.status_code
+    storage:
+      remote_write:
+        - url: 'http://mimir-nginx.mimir.svc.cluster.local/api/v1/push'
+          send_exemplars: true
