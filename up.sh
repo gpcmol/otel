@@ -36,5 +36,17 @@ helm --namespace grafana install --values ./grafana/values.yaml grafana grafana/
 grafana_password=$(kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode)
 echo "Grafana admin password: $grafana_password"
 
+# telemetry operator
+helm --namespace telemetry install opentelemetry-operator open-telemetry/opentelemetry-operator --create-namespace \
+--set "manager.collectorImage.repository=otel/opentelemetry-collector-contrib" \
+--set admissionWebhooks.certManager.enabled=false \
+--set admissionWebhooks.autoGenerateCert.enabled=true
+
 # telemetry
 helm --namespace telemetry install --values collector/values.yaml opentelemetry-collector open-telemetry/opentelemetry-collector --create-namespace
+
+# add instrumentation manifest to default namespace
+(
+cd instrumentation
+./instrument_namespace.sh default
+)

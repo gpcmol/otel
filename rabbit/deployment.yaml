@@ -1,0 +1,13 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: rabbitmq
+spec:
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+  rabbitmq:
+    additionalPlugins:
+      - rabbitmq_jms_topic_exchange

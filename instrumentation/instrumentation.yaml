@@ -12,11 +12,13 @@ spec:
     type: parentbased_traceidratio
     argument: "1"
   java:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.11.0
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.13.3
     env:
       - name: OTEL_JAVAAGENT_DEBUG
         value: "true"
-#      - name: OTEL_METRICS_EXPORTER
-#        value: none
+      - name: OTEL_METRICS_EXPORTER
+        value: none
       - name: OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_REQUEST_HEADERS
         value: "X-Forwarded-For"
+      - name: OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_RECEIVE_TELEMETRY_ENABLED
+        value: "true"

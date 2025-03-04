@@ -13,16 +13,26 @@ kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-passwor
 
 browse to localhost:3000, login with admin and password from above
 
-Setup datasources:
-loki datasource: http://loki-gateway.loki.svc.cluster.local
-tick skip TLS certificate validation
+#### Setup datasources:
+### Loki
+- loki datasource: http://loki-gateway.loki.svc.cluster.local
+- tick skip TLS certificate validation
+- Derived fields > Internal link > Tempo
+- Name: trace_id, Type: Label, Label: trace_id
+- Query: ${__value.raw}, URL label: Trace: ${__value.raw}
 
-prometheus (mimir) datasource: http://mimir-nginx.mimir.svc.cluster.local/prometheus
-tick skip TLS certificate validation
+### Prometheus
+- prometheus (mimir) datasource: http://mimir-nginx.mimir.svc.cluster.local/prometheus
+- tick skip TLS certificate validation
 
-tempo datasource: http://tempo-gateway.tempo.svc.cluster.local
-tick skip TLS certificate validation
-Additional settings > Service graph > select prometheus
+### Tempo
+- tempo datasource: http://tempo-gateway.tempo.svc.cluster.local
+- tick skip TLS certificate validation
+- Additional settings > Service graph > select prometheus
+- Trace to Logs > Data source > Loki
+- Tags: service.name as service_name
+- Use custom query: enabled
+- Query: {${__tags}} | trace_id = "${__trace.traceId}"
 
 ---
 Query in tempo (TraceQL): 

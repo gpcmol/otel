@@ -10,6 +10,7 @@ Take care of security in case of deploying it to production.
 - tempo
 - grafana
 - collector
+- telemetry-operator
 - instrumentation
 
 ### Requirements
@@ -25,3 +26,13 @@ Use down.sh to delete the kind cluster
 
 ### Note
 The default name 'kind' is used for the kind cluster
+
+### Annotations
+These are annotations to add to deployment.yaml
+```yaml
+spec:
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+```
