@@ -7,6 +7,7 @@ helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
 helm --namespace grafana install --values values.yaml grafana grafana/grafana --create-namespace
+(helm --namespace grafana upgrade --install grafana grafana/grafana --values values.yaml)
 kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 
 ./portforward.sh grafana 3000
@@ -33,6 +34,8 @@ browse to localhost:3000, login with admin and password from above
 - Tags: service.name as service_name
 - Use custom query: enabled
 - Query: {${__tags}} | trace_id = "${__trace.traceId}"
+
+See https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/
 
 ---
 Query in tempo (TraceQL): 

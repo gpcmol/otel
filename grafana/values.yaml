@@ -1,3 +1,54 @@
 persistence:
   type: pvc
   enabled: true
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        url: http://loki-gateway.loki.svc.cluster.local
+        access: proxy
+        isDefault: true
+        editable: true
+        uid: loki
+        jsonData:
+          tlsSkipVerify: true
+          derivedFields:
+            - name: trace_id
+              matcherType: 'label'
+              matcherRegex: 'trace_id'
+              url: '$${__value.raw}'
+              urlDisplayLabel: 'Trace: $${__value.raw}'
+              datasourceUid: 'tempo'
+      - name: Mimir
+        type: prometheus
+        url: http://mimir-nginx.mimir.svc.cluster.local/prometheus
+        access: proxy
+        isDefault: false
+        editable: true
+        uid: mimir
+        jsonData:
+          tlsSkipVerify: true
+      - name: Tempo
+        type: tempo
+        url: http://tempo-gateway.tempo.svc.cluster.local
+        access: proxy
+        isDefault: false
+        editable: true
+        uid: tempo
+        jsonData:
+          tlsSkipVerify: true
+          serviceMap:
+            datasourceUid: 'mimir'
+          nodeGraph:
+            enabled: true
+          tracesToLogsV2:
+            datasourceUid: loki
+            tags:
+              - key: service.name
+                value: service_name
+            customQuery: true
+            query: '{$${__tags}} | trace_id = "$${__trace.traceId}"'
+          tracesToMetrics:
+            datasourceUid: mimir
