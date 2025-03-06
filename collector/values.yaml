@@ -3,7 +3,7 @@ image:
   repository: "otel/opentelemetry-collector-contrib"
 autoscaling:
   enabled: true
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 3
 resources:
   limits:
@@ -35,11 +35,24 @@ config:
       verbosity: detailed
     otlphttp/1:
       endpoint: "http://loki-gateway.loki.svc.cluster.local/otlp"
+      sending_queue:
+        enabled: true
+        num_consumers: 100
+        queue_size: 100000
     otlphttp/2:
       endpoint: "http://tempo-gateway.tempo.svc.cluster.local/otlp"
     otlphttp/3:
       endpoint: "http://mimir-nginx.mimir.svc.cluster.local/otlp"
   processors:
+    attributes/custom:
+      actions:
+        - key: system
+          value: "talpa-it"
+          action: upsert
+    filter/drop_actuator:
+      traces:
+        span:
+          - IsMatch(attributes["http.route"], ".*(metrics|prometheus|health)(/.*)?$")
     batch:
       send_batch_size: 1000
       timeout: 1s
@@ -52,11 +65,11 @@ config:
     pipelines:
       logs/1:
         receivers: [ otlp ]
-        processors: [ memory_limiter, batch ]
+        processors: [ memory_limiter, batch, attributes/custom ] # keep order
         exporters: [ debug, otlphttp/1 ]
       traces/1:
         receivers: [ otlp ]
-        processors: [ memory_limiter, batch ]
+        processors: [ memory_limiter, filter/drop_actuator, batch, attributes/custom ] # keep order
         exporters: [ debug, otlphttp/2 ]
       metrics/1:
         receivers: [ otlp ]

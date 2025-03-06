@@ -45,6 +45,14 @@ helm --namespace telemetry install opentelemetry-operator open-telemetry/opentel
 # telemetry
 helm --namespace telemetry install --values collector/values.yaml opentelemetry-collector open-telemetry/opentelemetry-collector --create-namespace
 
+# rabbit
+(
+cd rabbit
+./rabbit-up.sh
+)
+
+sleep 5
+
 # add instrumentation manifest to default namespace
 (
 cd instrumentation
