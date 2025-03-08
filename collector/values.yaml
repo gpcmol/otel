@@ -53,6 +53,11 @@ config:
       traces:
         span:
           - IsMatch(attributes["http.route"], ".*(metrics|prometheus|health)(/.*)?$")
+    filter/log_severity:
+      logs:
+        log_record:
+          # drop all log level lower than WARN except for the opt-out applications
+          - '(not IsMatch(resource.attributes["service.name"], "^(invoice-app|garage-app)$") and severity_number < 13)'
     batch:
       send_batch_size: 1000
       timeout: 1s
@@ -65,7 +70,7 @@ config:
     pipelines:
       logs/1:
         receivers: [ otlp ]
-        processors: [ memory_limiter, batch, attributes/custom ] # keep order
+        processors: [ filter/log_severity, memory_limiter, batch, attributes/custom ] # keep order
         exporters: [ debug, otlphttp/1 ]
       traces/1:
         receivers: [ otlp ]

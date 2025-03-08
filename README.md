@@ -41,7 +41,7 @@ spec:
 kubectl port-forward service/rabbitmq 5672:5672 -n rabbitmq
 kubectl get secret rabbitmq-default-user -n rabbitmq -o jsonpath='{.data.connection_string}' | base64 --decode
 
-kubectl port-forward service/grafana 80:3000 -n grafana
+kubectl port-forward service/grafana 3000:80 -n grafana
 kubectl get secret grafana -n grafana -o jsonpath='{.data.admin-password}' | base64 --decode
 
 kubectl port-forward service/car-app-service 8080:8080 -n default

@@ -43,7 +43,7 @@ helm --namespace telemetry install opentelemetry-operator open-telemetry/opentel
 --set admissionWebhooks.autoGenerateCert.enabled=true
 
 # telemetry
-helm --namespace telemetry install --values collector/values.yaml opentelemetry-collector open-telemetry/opentelemetry-collector --create-namespace
+helm --namespace telemetry install --values collector/values.yaml opentelemetry-collector open-telemetry/opentelemetry-collector --create-namespace --wait
 
 # rabbit
 (
