@@ -57,7 +57,9 @@ config:
       logs:
         log_record:
           # drop all log level lower than WARN except for the opt-out applications
-          - '(not IsMatch(resource.attributes["service.name"], "^(invoice-app|garage-app)$") and severity_number < 13)'
+          # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/types/severity.md
+          - '(not IsMatch(resource.attributes["service.name"], "^(car-app|notify-app)$") and severity_number < 13)'
+          #- 'severity_number < 13'
     batch:
       send_batch_size: 1000
       timeout: 1s
