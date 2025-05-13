@@ -1,0 +1,48 @@
+vmstorage:
+  enabled: true
+  statefulset:
+    replicas: 2
+  retentionPeriod: 168h # 1 week
+#  resources:
+#    requests:
+#      memory: 2Gi
+#      cpu: 1
+#    limits:
+#      memory: 8Gi
+#      cpu: 4
+  horizontalPodAutoscaler:
+    enabled: true
+    maxReplicas: 2
+    minReplicas: 2
+
+vmselect:
+  enabled: true
+  deployment:
+    replicas: 2
+#  resources:
+#    requests:
+#      memory: 1Gi
+#      cpu: 0.5
+#    limits:
+#      memory: 4Gi
+#      cpu: 2
+  horizontalPodAutoscaler:
+    enabled: true
+    maxReplicas: 2
+    minReplicas: 2
+
+vminsert:
+  enabled: true
+  deployment:
+    replicas: 2
+#  resources:
+#    requests:
+#      memory: 1Gi
+#      cpu: 0.5
+#    limits:
+#      memory: 4Gi
+#      cpu: 2
+  horizontalPodAutoscaler:
+    enabled: true
+    maxReplicas: 2
+    minReplicas: 2

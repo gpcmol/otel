@@ -12,7 +12,7 @@ spec:
     type: parentbased_traceidratio
     argument: "1"
   java:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.13.3
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.15.0
     resources:
       limits:
         cpu: 500m
@@ -27,5 +27,3 @@ spec:
         value: none
       - name: OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_REQUEST_HEADERS
         value: "X-Forwarded-For"
-      - name: OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_RECEIVE_TELEMETRY_ENABLED
-        value: "true"

@@ -1,37 +1,219 @@
-ingester:
-  autoscaling:
-    enabled: true
-    minReplicas: 3 # keep this value
-    maxReplicas: 6
 server:
   grpc_server_max_recv_msg_size: 16777216 # 16 mb
   grpc_server_max_send_msg_size: 16777216
 reportingEnabled: false
+
+compactor:
+#  resources:
+#    limits:
+#      cpu: 1500m
+#      memory: 5Gi
+#    requests:
+#      cpu: 750m
+#      memory: 4Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    hpa:
+      enabled: true
+      targetMemoryUtilizationPercentage: 80
+      targetCPUUtilizationPercentage: 70
+  extraEnvFrom:
+    - secretRef:
+        name: "tempo-minio"
+  extraArgs:
+    - "-config.expand-env=true"
+  config:
+    compaction:
+      block_retention: 8h
+      compacted_block_retention: 15m # Default is 1h
+      compaction_window: 15m # Default is 1h
+
+ingester:
+#  resources:
+#    requests:
+#      cpu: 500m
+#      memory: 3000Mi
+#    limits:
+#      cpu: 1
+#      memory: 5000Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3 # min. value
+    maxReplicas: 6
+    targetMemoryUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 70
+  extraEnvFrom:
+    - secretRef:
+        name: "tempo-minio"
+  extraArgs:
+    - "-config.expand-env=true"
+  config:
+    trace_idle_period: 30s # default 10s
+    max_block_bytes: 104857600 # default 500MB
+    max_block_duration: 15m # default 30m
+    complete_block_timeout: 10m # default 15m
+
+distributor:
+  replicas: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetMemoryUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 70
+#  resources:
+#    requests:
+#      cpu: 300m
+#      memory: 2000Mi
+#    limits:
+#      cpu: 500m
+#      memory: 3000Mi
+    config:
+      log_received_spans:
+        enabled: false # true for debugging
+
+querier:
+  replicas: 2
+#  resources:
+#    limits:
+#      cpu: 1
+#      memory: 3Gi
+#    requests:
+#      cpu: 500m
+#      memory: 2Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2 # het op- en afschalen voor querier gaat in de toekomst wss deprecated worden
+    maxReplicas: 2
+    targetMemoryUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 70
+  extraEnvFrom:
+    - secretRef:
+        name: "tempo-minio"
+  extraArgs:
+    - "-config.expand-env=true"
+  # -- This value controls the overall number of simultaneous subqueries that the querier will service at once. It does not distinguish between the types of queries.
+  max_concurrent_queries: 40 # default 20
+
+queryFrontend:
+  replicas: 2
+#  resources:
+#    limits:
+#      cpu: 500m
+#      memory: 2Gi
+#    requests:
+#      cpu: 500m
+#      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 3
+    targetMemoryUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 70
+  extraEnvFrom:
+    - secretRef:
+        name: "tempo-minio"
+  extraArgs:
+    - "-config.expand-env=true"
+  config:
+    search:
+      concurrent_jobs: 2000 # default 1000
+      target_bytes_per_job: 209715200 # default 100mb
+    trace_by_id:
+      query_shards: 100 # default 50
+
 gateway:
   enabled: true
+#  resources:
+#    limits:
+#      cpu: 500m
+#      memory: 500Mi
+#    requests:
+#      cpu: 100m
+#      memory: 100Mi
+  verboseLogging: false
+
 minio:
   enabled: true
+#  resources:
+#    requests:
+#      cpu: 500m
+#      memory: 500Mi
+#    limits:
+#      cpu: 1
+#      memory: 2000Mi
+  buckets:
+    - name: tempo-traces
+      policy: none
+      purge: false
+  persistence:
+    size: 10Gi
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: "tempo-traces"
+      endpoint: "tempo-minio:9000"
+      insecure: true
+      access_key: "${rootUser}"
+      secret_key: "${rootPassword}"
+
 traces:
   otlp:
     http:
       enabled: true
     grpc:
       enabled: true
-distributor:
-  config:
-    log_received_spans:
-      enabled: true # only for debugging
-global_overrides:
-  metrics_generator_processors:
-    - service-graphs
-    - span-metrics
-    - local-blocks
+
+# see https://github.com/grafana/helm-charts/issues/3134#issuecomment-2866785342
+overrides:
+  defaults:
+    ingestion:
+      rate_strategy: local
+      rate_limit_bytes: 15000000
+      burst_size_bytes: 20000000
+      max_traces_per_user: 10000
+    read:
+      max_bytes_per_tag_values_query: 1000000
+    metrics_generator:
+      processors:
+        - span-metrics
+        - local-blocks
+        - service-graphs
+      generate_native_histograms: classic
+      ingestion_time_range_slack: 0s
+    global:
+      max_bytes_per_trace: 16777216 # 16mb
+
 metricsGenerator:
   enabled: true
+  replicas: 2
+#  resources:
+#    requests:
+#      cpu: 250m
+#      memory: 4000Mi
+#    limits:
+#      cpu: 2000m
+#      memory: 6000Mi
+  extraEnvFrom:
+    - secretRef:
+        name: "tempo-minio"
+  extraArgs:
+    - "-config.expand-env=true"
   config:
     processor:
       local_blocks:
         flush_to_storage: true
+      service_graphs:
+        # -- Additional dimensions to add to the metrics. Dimensions are searched for in the
+        # -- resource and span attributes and are added to the metrics if present.
+        dimensions: [ ]
+        histogram_buckets: [ 0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8 ]
+        max_items: 10000
+        wait: 10s
+        workers: 10
       span_metrics:
         dimensions:
           - http.request.method
@@ -45,5 +227,19 @@ metricsGenerator:
               - http.response.status_code
     storage:
       remote_write:
-        - url: 'http://mimir-nginx.mimir.svc.cluster.local/api/v1/push'
+        # - url: 'http://mimir-nginx.mimir.svc.cluster.local/api/v1/push'
+        - url: 'http://vmc-victoria-metrics-cluster-vminsert.victoria.svc.cluster.local:8480/insert/0/prometheus/api/v1/write'
           send_exemplars: true
+
+memcached:
+  replicas: 1
+#  resources:
+#    limits:
+#      cpu: 500m
+#      memory: 4000Mi
+#    requests:
+#      cpu: 100m
+#      memory: 3000Mi
+  extraArgs:
+    - "--conn-limit=2048"
+    - "--memory-limit=512"

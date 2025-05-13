@@ -1,6 +1,7 @@
 mode: "deployment"
 image:
   repository: "otel/opentelemetry-collector-contrib"
+  tag: "latest"
 autoscaling:
   enabled: true
   minReplicas: 2
@@ -11,7 +12,7 @@ resources:
     memory: "2048Mi"
   requests:
     cpu: "250m"
-    memory: "265Mi"
+    memory: "256Mi"
 ports:
   jaeger-compact:
     enabled: false

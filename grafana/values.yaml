@@ -1,6 +1,8 @@
 persistence:
   type: pvc
   enabled: true
+plugins:
+  - victoriametrics-metrics-datasource
 datasources:
   datasources.yaml:
     apiVersion: 1
@@ -51,4 +53,13 @@ datasources:
             customQuery: true
             query: '{$${__tags}} | trace_id = "$${__trace.traceId}"'
           tracesToMetrics:
-            datasourceUid: mimir
+            datasourceUid: victoria
+      - name: VictoriaMetrics
+        type: prometheus
+        url: http://vmc-victoria-metrics-cluster-vmselect.victoria.svc.cluster.local:8481/select/0/prometheus
+        access: proxy
+        isDefault: false
+        editable: true
+        uid: victoria
+        jsonData:
+          tlsSkipVerify: true
