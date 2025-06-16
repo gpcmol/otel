@@ -44,7 +44,7 @@ helm --namespace telemetry install opentelemetry-operator open-telemetry/opentel
 --set admissionWebhooks.certManager.enabled=false \
 --set admissionWebhooks.autoGenerateCert.enabled=true
 
-# telemetry
+# collector
 helm --namespace telemetry install --values collector/values.yaml opentelemetry-collector open-telemetry/opentelemetry-collector --create-namespace --wait
 
 # grafana

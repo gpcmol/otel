@@ -1,0 +1,55 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: loadbalancing
+  namespace: observability
+spec:
+  replicas: 2
+  serviceAccount: "loadbalancer"
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "${env:MY_POD_IP}:4317"
+          http:
+            endpoint: "${env:MY_POD_IP}:4318"
+            include_metadata: true
+
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 70
+        spike_limit_percentage: 30
+      batch:
+        send_batch_max_size: 1000
+        timeout: 1s
+        send_batch_size: 800
+
+    exporters:
+      nop: {}
+      debug:
+        verbosity: normal
+      loadbalancing:
+        protocol:
+          otlp:
+            tls:
+              insecure: true
+        resolver:
+          k8s:
+            service: tailsampling-collector-headless.observability
+
+    service:
+      telemetry:
+        logs:
+          level: "debug"
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter,batch]
+          exporters: [debug,loadbalancing]
+        metrics:
+          exporters: [nop]
+          processors: [memory_limiter,batch]
+          receivers: [otlp]
+          #receivers: [otlp,prometheus]
