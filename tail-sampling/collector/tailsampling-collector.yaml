@@ -24,41 +24,29 @@ spec:
         send_batch_max_size: 1000
         timeout: 1s
         send_batch_size: 800
-
-      tail_sampling: {
-        decision_wait: 10s, # default 30s
-        #      num_traces: 100, # default 50000
-        expected_new_traces_per_sec: 100, # default 0
-        "policies": [
-          {
-            name: trace-status-policy,
-            type: status_code,
-            status_code: { status_codes: [ "ERROR" ] },
-          },
-          {
-            "name": http_status_400_or_higher,
-            "type": numeric_attribute,
-            "numeric_attribute": {
-              "key": http.response.status_code,
-              "min_value": 400
-            }
-          },
-          {
-            "name": latency_gt_5000ms,
-            "type": latency,
-            "latency": {
-              "threshold_ms": 5000
-            }
-          },
-          {
-            "name": rest_traces_1_percent,
-            "type": probabilistic,
-            "probabilistic": {
-              "sampling_percentage": 1.0
-            }
-          }
-        ]
-      }
+      tail_sampling:
+        decision_wait: 30s
+        num_traces: 100000 # default 50000
+        expected_new_traces_per_sec: 10000 # default 0
+        policies:
+          - name: trace-status-policy
+            type: status_code
+            status_code:
+              status_codes: ["ERROR"]
+          - name: http_status_400_or_higher
+            type: numeric_attribute
+            numeric_attribute:
+              key: http.response.status_code
+              min_value: 400
+              max_value: 599
+          - name: latency_gt_5000ms
+            type: latency
+            latency:
+              threshold_ms: 5000
+          - name: rest_traces
+            type: probabilistic
+            probabilistic:
+              sampling_percentage: 1.0
 
     exporters:
       nop: {}

@@ -60,6 +60,13 @@ helm --namespace observability install opentelemetry-operator open-telemetry/ope
 --set admissionWebhooks.certManager.enabled=false \
 --set admissionWebhooks.autoGenerateCert.enabled=true --wait
 
+helm --namespace observability upgrade opentelemetry-operator open-telemetry/opentelemetry-operator \
+  --set "manager.collectorImage.repository=otel/opentelemetry-collector-contrib" \
+  --set "manager.collectorImage.tag=0.128.0" \
+  --set admissionWebhooks.certManager.enabled=false \
+  --set admissionWebhooks.autoGenerateCert.enabled=true \
+  --wait
+
 kubectl apply -f collector/service-account.yaml
 
 kubectl apply -f collector/tailsampling-collector.yaml

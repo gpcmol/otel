@@ -42,7 +42,7 @@ datasources:
         jsonData:
           tlsSkipVerify: true
           serviceMap:
-            datasourceUid: 'mimir'
+            datasourceUid: 'victoria'
           nodeGraph:
             enabled: true
           tracesToLogsV2:
