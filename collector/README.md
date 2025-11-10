@@ -39,7 +39,7 @@ data:
       otlphttp/2:
         endpoint: "http://tempo-gateway.tempo.svc.cluster.local/otlp"
       otlphttp/3:
-        endpoint: "http://mimir-nginx.mimir.svc.cluster.local/otlp"
+        endpoint: "http://mimir-gateway.mimir.svc.cluster.local/otlp"
     processors:
       batch:
         send_batch_size: 1000

@@ -23,7 +23,7 @@ browse to localhost:3000, login with admin and password from above
 - Query: ${__value.raw}, URL label: Trace: ${__value.raw}
 
 ### Prometheus
-- prometheus (mimir) datasource: http://mimir-nginx.mimir.svc.cluster.local/prometheus
+- prometheus (mimir) datasource: http://mimir-gateway.mimir.svc.cluster.local/prometheus
 - tick skip TLS certificate validation
 
 ### Tempo

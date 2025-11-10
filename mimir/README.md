@@ -12,4 +12,4 @@ helm --namespace mimir upgrade --values values.yaml mimir grafana/mimir-distribu
 ### Exemplars url
 This is the remote write endpoint to store the exemplars from Tempo.
 This is used for showing the service graph in Grafana and eventually for RED dashboarding.
-http://mimir-nginx.mimir.svc.cluster.local/api/v1/push
+http://mimir-gateway.mimir.svc.cluster.local/api/v1/push

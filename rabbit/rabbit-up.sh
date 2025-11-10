@@ -1,7 +1,9 @@
 #!/bin/bash
 
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-helm install rabbit bitnami/rabbitmq-cluster-operator --namespace rabbitmq --create-namespace
+kubectl get ns rabbitmq >/dev/null 2>&1 || kubectl create ns rabbitmq
+
+kubens rabbitmq
+
+kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
 
 kubectl apply -f deployment.yaml

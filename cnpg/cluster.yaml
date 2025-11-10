@@ -6,4 +6,4 @@ spec:
   instances: 3
   storage:
     size: 1Gi
-  imageName: ghcr.io/cloudnative-pg/postgresql:17.2
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.0

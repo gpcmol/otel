@@ -43,7 +43,7 @@ config:
     otlphttp/2:
       endpoint: "http://tempo-gateway.tempo.svc.cluster.local/otlp"
     otlphttp/3:
-      endpoint: "http://mimir-nginx.mimir.svc.cluster.local/otlp"
+      endpoint: "http://mimir-gateway.mimir.svc.cluster.local/otlp"
   processors:
     attributes/custom:
       actions:
@@ -59,7 +59,7 @@ config:
         log_record:
           # drop all log level lower than WARN except for the opt-out applications
           # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/types/severity.md
-          - '(not IsMatch(resource.attributes["service.name"], "^(car-app|notify-app)$") and severity_number < 13)'
+          - '(not IsMatch(resource.attributes["service.name"], "^(car-app|notify-app|my-service)$") and severity_number < 13)'
           #- 'severity_number < 13'
     batch:
       send_batch_size: 1000
@@ -73,11 +73,11 @@ config:
     pipelines:
       logs/1:
         receivers: [ otlp ]
-        processors: [ filter/log_severity, memory_limiter, batch, attributes/custom ] # keep order
+        processors: [ filter/log_severity, memory_limiter, attributes/custom, batch ] # keep order
         exporters: [ debug, otlphttp/1 ]
       traces/1:
         receivers: [ otlp ]
-        processors: [ memory_limiter, filter/drop_actuator, batch, attributes/custom ] # keep order
+        processors: [ memory_limiter, filter/drop_actuator, attributes/custom, batch ] # keep order
         exporters: [ debug, otlphttp/2 ]
       metrics/1:
         receivers: [ otlp ]

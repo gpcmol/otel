@@ -27,22 +27,23 @@ helm repo add vm https://victoriametrics.github.io/helm-charts/
 helm repo update
 
 # loki
-helm --namespace loki install --values ./loki/values.yaml loki grafana/loki --create-namespace
+helm --namespace loki install --values ./loki/values.yaml loki grafana/loki --create-namespace --wait=false
 
 # victoria
-helm --namespace victoria install --values ./victoria/values.yaml vmc vm/victoria-metrics-cluster --create-namespace
+helm --namespace victoria install --values ./victoria/values.yaml vmc vm/victoria-metrics-cluster --create-namespace --wait=false
 
 # mimir
-helm --namespace mimir install --values ./mimir/values.yaml mimir grafana/mimir-distributed --create-namespace
+helm --namespace mimir install --values ./mimir/values.yaml mimir grafana/mimir-distributed --create-namespace --wait=false
 
 # tempo
-helm --namespace tempo install --values ./tempo/values.yaml tempo grafana/tempo-distributed --create-namespace
+helm --namespace tempo install --values ./tempo/values.yaml tempo grafana/tempo-distributed --create-namespace --wait=false
 
 # telemetry operator
 helm --namespace telemetry install opentelemetry-operator open-telemetry/opentelemetry-operator --create-namespace \
 --set "manager.collectorImage.repository=otel/opentelemetry-collector-contrib" \
 --set admissionWebhooks.certManager.enabled=false \
---set admissionWebhooks.autoGenerateCert.enabled=true
+--set admissionWebhooks.autoGenerateCert.enabled=true \
+--wait
 
 # collector
 helm --namespace telemetry install --values collector/values.yaml opentelemetry-collector open-telemetry/opentelemetry-collector --create-namespace --wait
