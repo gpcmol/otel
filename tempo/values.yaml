@@ -3,6 +3,8 @@ server:
   grpc_server_max_send_msg_size: 16777216
 reportingEnabled: false
 
+#multitenancyEnabled: true
+
 compactor:
 #  resources:
 #    limits:

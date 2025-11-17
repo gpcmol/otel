@@ -1,0 +1,42 @@
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+  otlp-grpc:
+    address: ":4317"
+  otlp-http:
+    address: ":4318"
+
+tls:
+  certificates:
+    - secretName: example.com
+
+logs:
+  access:
+    enabled: true
+  general:
+    level: TRACE
+
+ports:
+  traefik:
+    port: 9000
+    expose:
+      default: true
+    exposedPort: 9000
+  web:
+    redirections:
+      entryPoint:
+        to: websecure
+        scheme: https
+        permanent: true
+  otlp-grpc:
+    port: 4317
+    expose:
+      default: true
+    exposedPort: 4317
+  otlp-http:
+    port: 4318
+    expose:
+      default: true
+    exposedPort: 4318

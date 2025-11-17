@@ -1,15 +1,17 @@
+global:
+  scopeOrgId: 'OVERRIDE'
 mode: "deployment"
 image:
   repository: "otel/opentelemetry-collector-contrib"
   tag: "latest"
 autoscaling:
   enabled: true
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 3
 resources:
   limits:
     cpu: "500m"
-    memory: "512i"
+    memory: "512Mi"
   requests:
     cpu: "250m"
     memory: "256Mi"
@@ -30,7 +32,7 @@ config:
       headers:
         - action: upsert
           key: X-Scope-OrgID
-          from_context: X-Scope-OrgID
+          value: "{{ .Values.global.scopeOrgId }}"
           default_value: unknown
   receivers:
     otlp:
@@ -51,7 +53,7 @@ config:
         num_consumers: 100
         queue_size: 100000
     otlphttp/2:
-      endpoint: "http://tempo-gateway.tempo.svc.cluster.local/otlp"
+      endpoint: "http://otlp.example.com:4318"
       auth:
         authenticator: headers_setter
     otlphttp/3:
@@ -76,8 +78,6 @@ config:
     batch:
       send_batch_size: 1000
       timeout: 1s
-      metadata_keys:
-        - X-Scope-OrgID
     memory_limiter:
       check_interval: 1s
       limit_percentage: 80

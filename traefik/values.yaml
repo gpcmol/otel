@@ -1,0 +1,27 @@
+entryPoints:
+  otlp-grpc:
+    address: ":4317"
+  otlp-http:
+    address: ":4318"
+
+tls:
+  certificates:
+    - secretName: example.com
+
+logs:
+  access:
+    enabled: true
+  general:
+    level: TRACE
+
+ports:
+  otlp-grpc:
+    port: 4317
+    expose:
+      default: true
+    exposedPort: 4317
+  otlp-http:
+    port: 4318
+    expose:
+      default: true
+    exposedPort: 4318

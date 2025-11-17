@@ -45,3 +45,11 @@ kubectl port-forward service/grafana 3000:80 -n grafana
 kubectl get secret grafana -n grafana -o jsonpath='{.data.admin-password}' | base64 --decode
 
 kubectl port-forward service/car-app-service 8080:8080 -n default
+
+### Expose ip address on local box
+cloud-provider-kind is a tool to bind an ip address to the ingress. See https://github.com/kubernetes-sigs/cloud-provider-kind
+Check the ip in the traefik service. Eventually add this to your /etc/hosts, e.g.:
+```
+172.18.0.10     car.example.com
+172.18.0.11     otlp.example.com
+```
